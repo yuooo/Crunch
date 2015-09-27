@@ -77,6 +77,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);
 
         // Find the Google+ sign in button.
@@ -87,9 +88,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
                 @Override
                 public void onClick(View view) {
                     signIn();
-                    googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
-                    name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
-//                    Log.i(TAG, googleId + " " + name);
+                    Log.i(TAG, "SignIn");
                 }
             });
         } else {
@@ -233,7 +232,7 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     }
 
     @Override
-    protected void onGoogleApiClientSignIn() {
+    protected void onGoogleApiClientSignOut() {
         //Set up sign out and disconnect buttons.
         Button signOutButton = (Button) findViewById(R.id.plus_sign_out_button);
         signOutButton.setOnClickListener(new OnClickListener() {
@@ -251,22 +250,28 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
         });
     }
 
-    protected void onPlusClientBlockingUI(boolean show) {
+    protected void onGoogleApiClientBlockingUI(boolean show) {
         showProgress(show);
     }
 
     @Override
-    protected void mGoogleApiClientRevokeAccess() {
+    protected void onGoogleApiClientRevokeAccess() {
 
     }
 
-    @Override
-    protected void mGoogleApiClientSignOut() {
 
+    @Override
+    protected void onGoogleApiClientSignIn(Bundle connectionHint) {
+        googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
+        name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
+        Log.i(TAG, googleId + " " + name);
     }
 
     @Override
-    protected void mGoogleApiClientBlockingUI(boolean show) {
+    protected void onGoogleApiClientSignIn() {
+        googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
+        name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
+        Log.i(TAG, googleId + " " + name);
 
     }
 
@@ -283,6 +288,13 @@ public class LoginActivity extends PlusBaseActivity implements LoaderCallbacks<C
     protected void onPlusClientRevokeAccess() {
         // TODO: Access to the user's G+ account has been revoked.  Per the developer terms, delete
         // any stored user data here.
+    }
+
+    public void onConnected(Bundle connectionHint) {
+        super.onConnected(connectionHint);
+        googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
+        name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
+        Log.i(TAG, googleId + " " + name);
     }
 
     protected void onPlusClientSignOut() {

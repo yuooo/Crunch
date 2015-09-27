@@ -25,6 +25,11 @@ public abstract class PlusBaseActivity extends AppCompatActivity
 
     private static final String TAG = PlusBaseActivity.class.getSimpleName();
 
+    public String googleId = "Id";
+
+    public String name = "John";
+
+
     // A magic number we will use to know that our sign-in error resolution activity has completed
     private static final int OUR_REQUEST_CODE = 49404;
 
@@ -45,7 +50,7 @@ public abstract class PlusBaseActivity extends AppCompatActivity
     /**
      * Called when the {@link GoogleApiClient} revokes access to this app.
      */
-    protected abstract void mGoogleApiClientRevokeAccess();
+    protected abstract void onGoogleApiClientRevokeAccess();
 
     /**
      * Called when the GoogleApiClient is successfully connected.
@@ -55,13 +60,15 @@ public abstract class PlusBaseActivity extends AppCompatActivity
     /**
      * Called when the {@link GoogleApiClient} is disconnected.
      */
-    protected abstract void mGoogleApiClientSignOut();
+    protected abstract void onGoogleApiClientSignOut();
+
+    protected abstract void onGoogleApiClientSignIn(Bundle connectionHint);
 
     /**
      * Called when the {@link GoogleApiClient} is blocking the UI.  If you have a progress bar widget,
      * this tells you when to show or hide it.
      */
-    protected abstract void mGoogleApiClientBlockingUI(boolean show);
+    protected abstract void onGoogleApiClientBlockingUI(boolean show);
 
     /**
      * Called when there is a change in connection state.  If you have "Sign in"/ "Connect",
@@ -117,7 +124,12 @@ public abstract class PlusBaseActivity extends AppCompatActivity
      */
     private void initiateGoogleApiClientConnect() {
         if (!mGoogleApiClient.isConnected() && !mGoogleApiClient.isConnecting()) {
+            Log.i(TAG, "BeforeConnect");
             mGoogleApiClient.connect();
+            Log.i(TAG, "TriedToConnect");
+//            googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
+//            name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
+//            Log.i(TAG, googleId + " " + name);
         }
     }
 
@@ -170,9 +182,9 @@ public abstract class PlusBaseActivity extends AppCompatActivity
                         public void onResult(Status status) {
                             // mGoogleApiClient is now disconnected and access has been revoked.
                             // Trigger app logic to comply with the developer policies
-                }
+                        }
 
-            });
+                    });
         }
 
     }
@@ -184,18 +196,37 @@ public abstract class PlusBaseActivity extends AppCompatActivity
     }
 
     @Override
+    public void onConnected(Bundle connectionHint) {
+
+        Log.i(TAG, "Connected");
+        updateConnectButtonState();
+
+        Log.i(TAG, "Button");
+        setProgressBarVisible(false);
+        onGoogleApiClientSignIn();
+        Log.i(TAG, "SignInConnected");
+
+
+        googleId = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getId();
+        name = Plus.PeopleApi.getCurrentPerson(mGoogleApiClient).getName().toString();
+        Log.i(TAG, googleId + " " + name);
+
+
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         initiateGoogleApiClientDisconnect();
     }
 
-    public boolean imGoogleApiClientConnecting() {
+    public boolean isGoogleApiClientConnecting() {
         return mGoogleApiClientIsConnecting;
     }
 
     private void setProgressBarVisible(boolean flag) {
         mGoogleApiClientIsConnecting = flag;
-        mGoogleApiClientBlockingUI(flag);
+        onGoogleApiClientBlockingUI(flag);
     }
 
     /**
@@ -246,12 +277,7 @@ public abstract class PlusBaseActivity extends AppCompatActivity
     /**
      * Successfully connected (called bymGoogleApiClient)
      */
-    @Override
-    public void onConnected(Bundle connectionHint) {
-        updateConnectButtonState();
-        setProgressBarVisible(false);
-        onGoogleApiClientSignIn();
-    }
+
 
     /**
      * Successfully disconnected (called by GoogleApiClient)
@@ -259,7 +285,7 @@ public abstract class PlusBaseActivity extends AppCompatActivity
 
     public void onDisconnected() {
         updateConnectButtonState();
-        mGoogleApiClientSignOut();
+        onGoogleApiClientSignOut();
     }
 
     /**
@@ -271,11 +297,15 @@ public abstract class PlusBaseActivity extends AppCompatActivity
      */
     @Override
     public void onConnectionFailed(ConnectionResult result) {
+
+        Log.i(TAG, "Not Connected");
         updateConnectButtonState();
 
         // Most of the time, the connection will fail with a user resolvable result. We can store
         // that in our mConnectionResult property ready to be used when the user clicks the
         // sign-in button.
+
+        Log.i(TAG, result.toString());
         if (result.hasResolution()) {
             mConnectionResult = result;
             if (mAutoResolveOnFail) {
