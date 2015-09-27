@@ -2,9 +2,14 @@
     <string name="app_name">Crunch</string>
     <string name="edit_message">Type my friend</string>
     <string name="button_send">Lunch!</string>
+    <string name="signed">You are signed In!</string>
+    <string name="signed_in">Let\'s start!</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_display_message">Crunch</string>
     <string name="title_activity_send_invite">SendInviteActivity</string>
+    <string name="title_activity_login2">Login2</string>
+    <string name="title_activity_sign_in">SignInActivity</string>
+    <string name="title_activity_login3">Login3</string>
 
 </resources>
